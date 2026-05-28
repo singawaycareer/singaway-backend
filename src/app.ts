@@ -4,16 +4,26 @@ import {Resend} from "resend";
 
 export async function createApp() {
   const app = express();
+  app.use(express.json());
+
+  const allowedOrigins = [
+    process.env.FRONTEND_URL, // e.g. https://www.singawaycareer.com
+    "https://singawaycareer.com", // optional non-www
+  ].filter(Boolean) as string[];
 
   app.use(
     cors({
-      origin: "https://singawaycareer.com",
+      origin: (origin, callback) => {
+        // allow server-to-server / curl / health checks without Origin header
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        return callback(new Error("Not allowed by CORS"));
+      },
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
       credentials: true,
     }),
   );
-  app.use(express.json());
 
   const resend = new Resend(process.env.RESEND_API_KEY);
 
