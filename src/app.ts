@@ -1,14 +1,15 @@
 import express from "express";
 import cors from "cors";
-import { Resend } from "resend";
+import {Resend} from "resend";
 
 export async function createApp() {
   const app = express();
 
-  app.use(cors({
-    origin: "https://singawaycareer.com",
-    credentials: true,
-  }));
+  app.use(
+    cors({
+      origin: "https://singawaycareer.com",
+    }),
+  );
   app.use(express.json());
 
   const resend = new Resend(process.env.RESEND_API_KEY);
@@ -19,7 +20,7 @@ export async function createApp() {
 
   app.post("/send-email", async (req, res) => {
     try {
-      const { name, mobile, email, service, message } = req.body;
+      const {name, mobile, email, service, message} = req.body;
 
       const response = await resend.emails.send({
         from: "SingAway Career <noreply@singawaycareer.com>",
@@ -35,10 +36,7 @@ export async function createApp() {
       });
 
       res.status(200).json(response);
-
     } catch (error) {
-      
-
       res.status(500).json({
         success: false,
         message: (error as Error).message,
