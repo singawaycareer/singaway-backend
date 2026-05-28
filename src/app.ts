@@ -8,6 +8,9 @@ export async function createApp() {
   app.use(
     cors({
       origin: "https://singawaycareer.com",
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+     
     }),
   );
   app.use(express.json());
@@ -20,7 +23,7 @@ export async function createApp() {
 
   app.post("/send-email", async (req, res) => {
     try {
-      const {name, mobile, email, service, message} = req.body;
+      const {name, phone, email, service, message} = req.body;
 
       const response = await resend.emails.send({
         from: "SingAway Career <noreply@singawaycareer.com>",
@@ -28,7 +31,7 @@ export async function createApp() {
         subject: "New Enquiry",
         html: `
           <p>Name: ${name}</p>
-          <p>Mobile: ${mobile}</p>
+          <p>Phone: ${phone}</p>
           <p>Email: ${email}</p>
           <p>Service: ${service}</p>
           <p>Message: ${message}</p>
