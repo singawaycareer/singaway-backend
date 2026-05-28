@@ -10,7 +10,7 @@ export async function createApp() {
       origin: "https://singawaycareer.com",
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
-     
+      credentials: true,
     }),
   );
   app.use(express.json());
