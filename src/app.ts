@@ -27,8 +27,17 @@ export async function createApp() {
 
   const resend = new Resend(process.env.RESEND_API_KEY);
 
-  app.get("/", (req, res) => {
-    res.send("Server is running");
+  app.get("/", (_req, res) => {
+    res.json({
+      name: "SingAway Career API",
+      status: "ok",
+      site: "https://www.singawaycareer.com",
+      docs: "https://www.singawaycareer.com/llms.txt",
+    });
+  });
+
+  app.get("/health", (_req, res) => {
+    res.json({ status: "ok" });
   });
 
   app.post("/send-email", async (req, res) => {
