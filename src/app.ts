@@ -2,41 +2,46 @@ import express from "express";
 import cors from "cors";
 import {Resend} from "resend";
 
+let resendClient: Resend | null = null;
+
+function getResend() {
+  if (!resendClient) {
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendClient;
+}
+
 export async function createApp() {
   const app = express();
-  app.use(express.json());
+  app.use(express.json({ limit: "32kb" }));
 
   const allowedOrigins = [
-    process.env.FRONTEND_URL, // e.g. https://www.singawaycareer.com
-    "https://singawaycareer.com", // optional non-www
+    process.env.FRONTEND_URL,
+    "https://singawaycareer.com",
+    "https://www.singawaycareer.com",
   ].filter(Boolean) as string[];
 
   app.use(
     cors({
       origin: (origin, callback) => {
-        // allow server-to-server / curl / health checks without Origin header
         if (!origin) return callback(null, true);
         if (allowedOrigins.includes(origin)) return callback(null, true);
         return callback(new Error("Not allowed by CORS"));
       },
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
+      methods: ["GET", "POST", "OPTIONS"],
+      allowedHeaders: ["Content-Type"],
       credentials: true,
+      maxAge: 86400,
     }),
   );
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
-
   app.get("/", (_req, res) => {
-    res.json({
-      name: "SingAway Career API",
-      status: "ok",
-      site: "https://www.singawaycareer.com",
-      docs: "https://www.singawaycareer.com/llms.txt",
-    });
+    res.setHeader("Cache-Control", "public, max-age=60");
+    res.json({ status: "ok" });
   });
 
   app.get("/health", (_req, res) => {
+    res.setHeader("Cache-Control", "no-store");
     res.json({ status: "ok" });
   });
 
@@ -44,7 +49,7 @@ export async function createApp() {
     try {
       const {name, phone, email, service, message} = req.body;
 
-      const response = await resend.emails.send({
+      const response = await getResend().emails.send({
         from: "SingAway Career <noreply@singawaycareer.com>",
         to: "singawaycareer@gmail.com",
         subject: "New Enquiry",
